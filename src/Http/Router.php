@@ -6,11 +6,10 @@ use PulseFrame\Facades\Config;
 use PulseFrame\Facades\Request;
 use PulseFrame\Exceptions\NotFoundException;
 use PulseFrame\Exceptions\MethodNotAllowedException;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use PulseFrame\Exceptions\BadRequestException;
+use PulseFrame\Middleware;
 use InvalidArgumentException;
 use Closure;
-
-use function PHPUnit\Framework\matches;
 
 class Router
 {
@@ -112,7 +111,7 @@ class Router
     $constraints = $route['constraints'] ?? [];
 
     if (!$this->validateConstraints($request, $constraints)) {
-      throw new BadRequestHttpException('The request parameters do not match the required constraints.');
+      throw new BadRequestException('The request parameters do not match the required constraints.');
     }
 
     $middleware = $route['middleware'];
@@ -134,12 +133,13 @@ class Router
 
     foreach (array_reverse($middleware) as $middlewareClass) {
       $next = function ($request) use ($next, $middlewareClass) {
-        if ($middlewareClass instanceof Closure) {
-          return $middlewareClass($request, $next);
-        }
 
-        if (class_exists($middlewareClass)) {
+        $reflection = new \ReflectionClass($middlewareClass);
+
+        if (class_exists($middlewareClass) && $reflection->isSubclassOf(Middleware::class)) {
           return (new $middlewareClass)->handle($request, $next);
+        } else {
+          throw new InvalidArgumentException("Middleware class [$middlewareClass] does not extend to PulseFrame/Middleware.");
         }
 
         throw new InvalidArgumentException("Middleware class [$middlewareClass] not found.");

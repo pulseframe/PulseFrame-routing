@@ -135,6 +135,12 @@ class RouteHandler
       case 401:
         ExceptionHandler::renderErrorView($statusCode, 'Unauthorized access.');
         break;
+      case 400:
+        ExceptionHandler::renderErrorView($statusCode, 'Bad request.');
+        break;
+      case 429:
+        ExceptionHandler::renderErrorView($statusCode, 'Rate limit exceeded.');
+        break;
       case 500:
         ExceptionHandler::renderErrorView($statusCode, 'An internal server error occurred.', $e);
         break;

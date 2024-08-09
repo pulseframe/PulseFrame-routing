@@ -2,11 +2,11 @@
 
 namespace PulseFrame\Exceptions;
 
-class NotFoundException extends \RuntimeException
+class RateLimitExceededException extends \RuntimeException
 {
   protected $statusCode;
 
-  public function __construct(string $message, int $code = 404, \Throwable $previous = null)
+  public function __construct(string $message, int $code = 429, \Throwable $previous = null)
   {
     $this->statusCode = $code;
     parent::__construct($message, $code, $previous);
