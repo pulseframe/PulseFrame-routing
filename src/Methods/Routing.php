@@ -17,7 +17,7 @@ abstract class Routing
 
   public function middleware($middleware = [])
   {
-    $instance = self::$instance->router;
+    $instance = self::$instance;
 
     if (!is_array($middleware)) {
       $middleware = [$middleware];
@@ -50,7 +50,7 @@ abstract class Routing
 
   public function name($name)
   {
-    $instance = self::$instance->router;
+    $instance = self::$instance;
 
     if ($instance->currentRoute) {
       $method = $instance->currentRoute['method'];
@@ -69,7 +69,7 @@ abstract class Routing
 
   public function where($parameter, $pattern)
   {
-    $instance = self::$instance->router;
+    $instance = self::$instance;
 
     if ($instance->currentRoute) {
       $uri = $instance->currentRoute['uri'];

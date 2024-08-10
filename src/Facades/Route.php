@@ -35,7 +35,8 @@ class Route
     if (!self::$router) {
       $routeHandler = new RouteHandler();
       self::$router = $routeHandler->getRouter();
-      self::$instance = $routeHandler->getInstance();
+      $instance = $routeHandler->getInstance();
+      self::$instance = $instance->router;
     }
 
     if (method_exists(self::$instance, $method)) {

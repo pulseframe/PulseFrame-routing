@@ -8,7 +8,7 @@ class group extends Routing
 {
   public function handle(array $attributes, callable $callback)
   {
-    $instance = self::$instance->router;
+    $instance = self::$instance;
 
     if (!$instance) {
       throw new \RuntimeException('Router instance is not initialized.');

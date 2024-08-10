@@ -2,7 +2,6 @@
 
 namespace PulseFrame\Http\Handlers;
 
-use PulseFrame\Facades\View;
 use PulseFrame\Facades\Config;
 use PulseFrame\Facades\Log;
 use PulseFrame\Facades\Response;
@@ -89,7 +88,7 @@ class RouteHandler
     return $this->router;
   }
 
-  public function handleRequest($loader = null)
+  public function handleRequest()
   {
     $request = Request::capture();
 
@@ -98,10 +97,6 @@ class RouteHandler
     ob_start();
 
     try {
-      if (!$loader) {
-        throw new \RuntimeException('Loader not set');
-      }
-
       $response = $this->router->dispatch($request);
 
       $output = ob_get_contents();
@@ -123,29 +118,29 @@ class RouteHandler
     $statusCode = $e->getCode();
 
     switch ($statusCode) {
-      case 404:
+      case Response::HTTP_NOT_FOUND:
         ExceptionHandler::renderErrorView($statusCode, 'The page you are looking for could not be found.');
         break;
-      case 405:
+      case Response::HTTP_METHOD_NOT_ALLOWED:
         ExceptionHandler::renderErrorView($statusCode, 'The method you are using is not supported.');
         break;
-      case 403:
+      case Response::HTTP_FORBIDDEN:
         ExceptionHandler::renderErrorView($statusCode, 'Access denied.');
         break;
-      case 401:
+      case Response::HTTP_UNAUTHORIZED:
         ExceptionHandler::renderErrorView($statusCode, 'Unauthorized access.');
         break;
-      case 400:
+      case Response::HTTP_BAD_REQUEST:
         ExceptionHandler::renderErrorView($statusCode, 'Bad request.');
         break;
-      case 429:
+      case Response::HTTP_TO_MANY_REQUESTS:
         ExceptionHandler::renderErrorView($statusCode, 'Rate limit exceeded.');
         break;
-      case 500:
+      case Response::HTTP_INTERNAL_SERVER_ERROR:
         ExceptionHandler::renderErrorView($statusCode, 'An internal server error occurred.', $e);
         break;
       default:
-        ExceptionHandler::renderErrorView(500, 'An unexpected error occurred.', $e);
+        ExceptionHandler::renderErrorView(Response::HTTP_INTERNAL_SERVER_ERROR, 'An unexpected error occurred.', $e);
         break;
     }
   }
@@ -175,6 +170,6 @@ class RouteHandler
   {
     $instance = self::getInstance();
     $instance->loadRoutes();
-    $instance->handleRequest((new View())::$twig);
+    $instance->handleRequest();
   }
 }

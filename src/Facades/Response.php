@@ -26,6 +26,7 @@ class Response
   const HTTP_FORBIDDEN = 403;
   const HTTP_UNAUTHORIZED = 401;
   const HTTP_BAD_REQUEST = 400;
+  const HTTP_TO_MANY_REQUESTS = 429;
   const HTTP_INTERNAL_SERVER_ERROR = 500;
 
   /**
