@@ -153,7 +153,7 @@ class ExceptionHandler
       }
 
       if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-        echo View::render('error.twig', [
+        echo View::render('error', [
           'status' => $statusCode,
           'message' => $message,
           'exception' => $exception,
