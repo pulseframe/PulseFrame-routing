@@ -85,7 +85,7 @@ class ExceptionHandler
         $e,
       );
     } else {
-      self::renderErrorView(500, Translation::key('errors.error-1'), $e);
+      self::renderErrorView(Response::HTTP_INTERNAL_SERVER_ERROR, Translation::key('errors.error-1'), $e);
     }
   }
 
@@ -144,7 +144,7 @@ class ExceptionHandler
     try {
       http_response_code($statusCode);
 
-      if ($statusCode === 500) {
+      if ($statusCode === Response::HTTP_INTERNAL_SERVER_ERROR) {
         \Sentry\withScope(function (\Sentry\State\Scope $scope) use ($exception): void {
           $scope->setTag('error_code', self::$ErrorCode);
 
@@ -152,7 +152,7 @@ class ExceptionHandler
         });
       }
 
-      $ErrorCode = $statusCode === 500 ? self::$ErrorCode : null;
+      $ErrorCode = $statusCode === Response::HTTP_INTERNAL_SERVER_ERROR ? self::$ErrorCode : null;
 
       new View();
 
