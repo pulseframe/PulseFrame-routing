@@ -15,6 +15,7 @@
     ],
     "minimum-stability": "stable",
     "require": {
+        "symfony/http-foundation": "^7.1",
         "pulseframe/base": "^1.2"
     }
 }

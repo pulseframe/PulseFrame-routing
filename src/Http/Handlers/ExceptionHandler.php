@@ -28,7 +28,7 @@ class ExceptionHandler
   {
     self::initializeSentry(Env::get('sentry_dsn'));
 
-    self::$ErrorCode = substr(strtoupper(base64_encode(random_bytes(6))), 0, 8);
+    self::$ErrorCode = substr(bin2hex(random_bytes(6)), 0, 8);
 
     // Set the exception and error handlers
     set_exception_handler([self::class, 'handle']);
@@ -85,7 +85,7 @@ class ExceptionHandler
         $e,
       );
     } else {
-      self::renderErrorView(Response::HTTP_INTERNAL_SERVER_ERROR, Translation::key('errors.error-1'), $e);
+      self::renderErrorView(500, Translation::key('errors.error-1'), $e);
     }
   }
 
@@ -144,7 +144,7 @@ class ExceptionHandler
     try {
       http_response_code($statusCode);
 
-      if ($statusCode === Response::HTTP_INTERNAL_SERVER_ERROR) {
+      if ($statusCode === 500) {
         \Sentry\withScope(function (\Sentry\State\Scope $scope) use ($exception): void {
           $scope->setTag('error_code', self::$ErrorCode);
 
@@ -152,12 +152,26 @@ class ExceptionHandler
         });
       }
 
+      $ErrorCode = $statusCode === 500 ? self::$ErrorCode : null;
+
+      new View();
+
       if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-        echo View::render('error', [
+        if (Env::get('app.settings.debug')) {
+          if ($ErrorCode) {
+            $page = 'error';
+          } else {
+            $page = View::$errorPage;
+          }
+        } else {
+          $page = View::$errorPage;
+        }
+
+        echo View::render($page, [
           'status' => $statusCode,
           'message' => $message,
           'exception' => $exception,
-          'code' => self::$ErrorCode
+          'code' => $ErrorCode
         ]);
       } else {
         $message = Config::get('app', 'stage') === "development" ? $exception->getMessage() : Translation::key('errors.error-0');
