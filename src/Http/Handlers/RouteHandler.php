@@ -36,6 +36,8 @@ class RouteHandler
   public $groupMiddleware = [];
   public $routeGroups = [];
 
+  protected static $errorHandler;
+
   public function __construct()
   {
     $this->initializeRouter();
@@ -159,10 +161,29 @@ class RouteHandler
       $response = new Response($response);
       $response->send();
     } catch (\Throwable $e) {
-      $this->handleException($e);
+      if (self::$errorHandler) {
+        call_user_func(self::$errorHandler, $e);
+      } else {
+        $this->handleException($e);
+      }
     } finally {
       echo $output;
     }
+  }
+
+  /**
+   * Set a custom error handler for the RouteHandler.
+   *
+   * @param callable $handler A callable function that will be used to handle exceptions.
+   *
+   * This method allows the application to define a custom error handling mechanism. The provided handler 
+   * will be invoked whenever an exception is thrown during request processing, allowing for centralized 
+   * handling of errors (e.g., logging, displaying user-friendly messages, etc.).
+   * If no custom handler is set, the default exception handling mechanism will be used.
+   */
+  public static function setErrorHandler(callable $handler)
+  {
+    self::$errorHandler = $handler;
   }
 
   /**
