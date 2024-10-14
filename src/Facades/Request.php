@@ -7,10 +7,11 @@ use PulseFrame\Exceptions\ValidationException;
 /**
  * Class Request
  * 
- * @category facades
- * @name Request
- * 
  * This class provides methods for retrieving request information such as query parameters and domain.
+ * 
+ * @classname PulseFrame\Facades\Request
+ * @category Facades
+ * @package PulseFrame\Routing\Facades
  */
 class Request extends \Symfony\Component\HttpFoundation\Request
 {
@@ -61,6 +62,7 @@ class Request extends \Symfony\Component\HttpFoundation\Request
    * @param array $rules Array of field names and validation rules.
    * @param bool $returnData Bool for returning data.
    * @param bool $output Bool output any validation errors.
+   * @return array|null Returns validated data if $returnData is true; otherwise, null.
    * @throws ValidationException If validation fails.
    */
   public static function validate(array $rules, bool $returnData = true, bool $output = true)
@@ -118,6 +120,11 @@ class Request extends \Symfony\Component\HttpFoundation\Request
     }
   }
 
+  /**
+   * Capture and return a new instance of the Request object.
+   *
+   * @return self A new instance of the Request class.
+   */
   public static function Capture()
   {
     return new self($_SERVER, $_GET, $_POST, $_COOKIE, $_FILES, $_SERVER);

@@ -11,18 +11,89 @@ use PulseFrame\Middleware;
 use InvalidArgumentException;
 use Closure;
 
+/**
+ * Class Router
+ * 
+ * Handles the routing of HTTP requests, including route registration, middleware application, and dispatching actions.
+ * 
+ * @classname PulseFrame\Http\Router
+ * @category routing
+ * @package PulseFrame\Routing\Http
+ */
 class Router
 {
+  /**
+   * Array of registered routes.
+   * 
+   * @var array
+   */
   public $routes = [];
+
+  /**
+   * Array of registered middleware.
+   * 
+   * @var array
+   */
   public $middleware = [];
+
+  /**
+   * Array of route names.
+   * 
+   * @var array
+   */
   public $routeNames = [];
+
+  /**
+   * Array of route constraints.
+   * 
+   * @var array
+   */
   public $constraints = [];
+
+  /**
+   * The current route being processed.
+   * 
+   * @var array|null
+   */
   public $currentRoute = null;
+
+  /**
+   * Flag indicating if the router is in a group.
+   * 
+   * @var bool
+   */
   public $isInGroup = false;
+
+  /**
+   * Prefix for the current route group.
+   * 
+   * @var string
+   */
   public $groupPrefix = '';
+
+  /**
+   * Middleware for the current route group.
+   * 
+   * @var array
+   */
   public $groupMiddleware = [];
+
+  /**
+   * Array of route groups.
+   * 
+   * @var array
+   */
   public $routeGroups = [];
 
+  /**
+   * Adds a new route to the router.
+   * 
+   * @param string $method HTTP method (e.g., 'GET', 'POST')
+   * @param string $uri URI pattern for the route
+   * @param callable|array|string $action The action to be executed for the route, can be a callable, a controller method in an array, or a string in the format 'Controller@method'
+   * 
+   * @return void
+   */
   public function addRoute($method, $uri, $action)
   {
     $this->currentRoute = [
@@ -39,11 +110,28 @@ class Router
     ];
   }
 
+  /**
+   * Registers a middleware alias with a class.
+   * 
+   * @param string $alias The alias for the middleware
+   * @param string $class The middleware class
+   * 
+   * @return void
+   */
   public function registerMiddleware($alias, $class)
   {
     $this->middleware[$alias] = $class;
   }
 
+  /**
+   * Resolves middleware aliases to their actual class names.
+   * 
+   * @param array $middleware List of middleware aliases or classes
+   * 
+   * @return array Resolved middleware classes or closures
+   * 
+   * @throws InvalidArgumentException If a middleware alias or class does not exist
+   */
   public function resolveMiddlewareAliases(array $middleware)
   {
     $middlewareConfig = Config::get('app', 'middleware');
@@ -68,7 +156,17 @@ class Router
     return $resolvedMiddleware;
   }
 
-  // in your Router class
+  /**
+   * Dispatches a request to the appropriate route.
+   * 
+   * @param Request $request The incoming HTTP request
+   * 
+   * @return mixed The response from the action
+   * 
+   * @throws NotFoundException If the route is not found
+   * @throws MethodNotAllowedException If the HTTP method is not allowed
+   * @throws BadRequestException If the request parameters do not match constraints
+   */
   public function dispatch(Request $request)
   {
     $method = $request->getMethod();
@@ -127,6 +225,16 @@ class Router
     }
   }
 
+  /**
+   * Applies middleware to the given handler.
+   * 
+   * @param array $middleware List of middleware classes or closures
+   * @param callable $handler The request handler to be wrapped by middleware
+   * 
+   * @return callable The handler with applied middleware
+   * 
+   * @throws InvalidArgumentException If a middleware class does not extend the Middleware class
+   */
   protected function applyMiddleware(array $middleware, $handler)
   {
     $next = $handler;
@@ -139,16 +247,24 @@ class Router
         if (class_exists($middlewareClass) && $reflection->isSubclassOf(Middleware::class)) {
           return (new $middlewareClass)->handle($request, $next);
         } else {
-          throw new InvalidArgumentException("Middleware class [$middlewareClass] does not extend to PulseFrame/Middleware.");
+          throw new InvalidArgumentException("Middleware class [$middlewareClass] does not extend PulseFrame/Middleware.");
         }
 
         throw new InvalidArgumentException("Middleware class [$middlewareClass] not found.");
       };
-    };
+    }
 
     return $next;
   }
 
+  /**
+   * Validates request parameters against route constraints.
+   * 
+   * @param Request $request The incoming HTTP request
+   * @param array $constraints The route constraints
+   * 
+   * @return bool True if constraints are met, false otherwise
+   */
   protected function validateConstraints(Request $request, array $constraints)
   {
     $parameters = $this->extractParameters($request->getPathInfo());
@@ -162,6 +278,13 @@ class Router
     return true;
   }
 
+  /**
+   * Extracts parameters from the URI.
+   * 
+   * @param string $uri The URI with parameter placeholders
+   * 
+   * @return array Associative array of parameters
+   */
   protected function extractParameters($uri)
   {
     $parameters = [];
@@ -175,11 +298,30 @@ class Router
     return $parameters;
   }
 
+  /**
+   * Extracts a parameter value from the URI (placeholder implementation).
+   * 
+   * @param string $parameter The parameter name
+   * 
+   * @return string The extracted parameter value
+   */
   protected function extractParameterFromUri($parameter)
   {
     return '';
   }
 
+  /**
+   * Calls the action for the route.
+   * 
+   * @param callable|array|string $action The action to be executed
+   * @param Request $request The incoming HTTP request
+   * @param array $matches Route parameters
+   * 
+   * @return mixed The result of the action
+   * 
+   * @throws NotFoundException If the controller or method does not exist
+   * @throws InvalidArgumentException If the action format is invalid
+   */
   protected function callAction($action, $request, $matches)
   {
     try {

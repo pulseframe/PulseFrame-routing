@@ -6,7 +6,13 @@ use PulseFrame\Http\Handlers\RouteHandler;
 use PulseFrame\Facades\Route;
 
 /**
+ * Class Response
+ * 
  * Represents an HTTP response.
+ * 
+ * @classname PulseFrame\Facades\Response
+ * @category Facades
+ * @package PulseFrame\Routing\Facades
  */
 class Response
 {
@@ -26,7 +32,7 @@ class Response
   const HTTP_FORBIDDEN = 403;
   const HTTP_UNAUTHORIZED = 401;
   const HTTP_BAD_REQUEST = 400;
-  const HTTP_TO_MANY_REQUESTS = 429;
+  const HTTP_TOO_MANY_REQUESTS = 429;
   const HTTP_INTERNAL_SERVER_ERROR = 500;
 
   /**
@@ -51,6 +57,7 @@ class Response
    * Set the response content.
    *
    * @param string $content The response content.
+   * @return void
    */
   public function setContent(string $content): void
   {
@@ -71,6 +78,7 @@ class Response
    * Set the HTTP status code.
    *
    * @param int $statusCode The HTTP status code.
+   * @return void
    */
   public function setStatusCode(int $statusCode): void
   {
@@ -91,6 +99,7 @@ class Response
    * Set the HTTP headers.
    *
    * @param array $headers HTTP headers.
+   * @return void
    */
   public function setHeaders(array $headers): void
   {
@@ -109,6 +118,8 @@ class Response
 
   /**
    * Send the HTTP response.
+   *
+   * @return void
    */
   public function send(): void
   {
@@ -128,7 +139,7 @@ class Response
    * @param mixed|null $code The optional code of the JSON response.
    * @return string JSON-encoded response.
    */
-  public static function JSON($status, $message, $code = null)
+  public static function JSON($status, $message, $code = null): string
   {
     return json_encode(['status' => $status, 'message' => $message, 'code' => $code]);
   }
@@ -141,8 +152,9 @@ class Response
    * @param int $status The HTTP status code for the redirect.
    * @param array $headers HTTP headers for the redirect.
    * @throws \InvalidArgumentException When the route is not found.
+   * @return void
    */
-  public static function Redirect($routeName, $parameters = [], $status = 302, $headers = [])
+  public static function Redirect(string $routeName, array $parameters = [], int $status = 302, array $headers = []): void
   {
     if (strpos($routeName, '/') === 0) {
       $url = $routeName;
@@ -167,7 +179,7 @@ class Response
    * @param string $routeName The name of the route.
    * @return mixed|null The route if found; null otherwise.
    */
-  protected static function findRouteByName($router, $routeName)
+  protected static function findRouteByName($router, string $routeName)
   {
     $routeNames = RouteHandler::$routeNames;
 
@@ -186,8 +198,9 @@ class Response
    * @param string $url The URL to redirect to.
    * @param int $status The HTTP status code for the redirect.
    * @param array $headers HTTP headers for the redirect.
+   * @return void
    */
-  protected static function performRedirect($url, $status = 302, $headers = [])
+  protected static function performRedirect(string $url, int $status = 302, array $headers = []): void
   {
     http_response_code($status);
 
@@ -206,7 +219,7 @@ class Response
    * @param array $parameters The parameters for the URL.
    * @return string The generated URL.
    */
-  protected static function generateUrl($routeUrl, $parameters = [])
+  protected static function generateUrl(string $routeUrl, array $parameters = []): string
   {
     foreach ($parameters as $key => $value) {
       $routeUrl = str_replace('{' . $key . '}', $value, $routeUrl);

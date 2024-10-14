@@ -16,6 +16,12 @@
     "minimum-stability": "stable",
     "require": {
         "symfony/http-foundation": "^7.1",
-        "pulseframe/base": "^1.2"
+        "pulseframe/base": "^1.2",
+        "pulseframe/exceptions": "^1.0"
+    },
+    "providers": {
+        "http": [
+          "PulseFrame\\Http\\Providers\\RoutingServiceProvider"
+        ]
     }
 }

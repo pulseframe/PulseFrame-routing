@@ -8,10 +8,12 @@ use PulseFrame\Http\Handlers\RouteHandler;
 /**
  * Class Route
  *
- * @category facades
- *
  * This facade provides a simple interface for routing in the application. It forwards static method calls
  * to an instance of the route handler, allowing you to define routes using intuitive syntax.
+ * 
+ * @classname PulseFrame\Facades\Route
+ * @category Facades
+ * @package PulseFrame\Routing\Facades
  */
 class Route
 {
@@ -29,6 +31,7 @@ class Route
    * @param string $method The name of the method being called (get, post, etc.).
    * @param array $args The arguments passed to the method.
    * @return mixed The result of the router method call.
+   * @throws \BadMethodCallException If the method does not exist.
    */
   public static function __callStatic($method, $args)
   {
